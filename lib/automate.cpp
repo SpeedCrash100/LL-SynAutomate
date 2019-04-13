@@ -24,12 +24,14 @@ bool Automate::Analyze(std::basic_istream<char>& input)
 
     std::cout << "Used rules: ";
 
-    Terminal symbol = static_cast<char>(input.peek());
+    Symbol symbol = Terminal(static_cast<char>(input.peek()));
 
     while (!m_symbols.empty()) {
         auto topStack = m_symbols.top();
 
-        symbol = static_cast<char>(input.peek());
+        symbol = Terminal(static_cast<char>(input.peek()));
+        if (isEOW(symbol))
+            symbol = m_symbolsMap[m_eow];
 
         auto cmd = getCommand(topStack, symbol);
         processCommand(cmd);
