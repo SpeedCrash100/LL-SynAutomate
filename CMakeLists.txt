@@ -2,13 +2,25 @@ cmake_minimum_required(VERSION 3.0)
 
 project(LL-SynAutomate)
 
-set(LL_SRCS
-    automate.cpp
-    main.cpp
+set(LL_LIB_SRCS
+    lib/automate.cpp
 )
 
-set(LL_HDRS
-    automate.hpp
+set(LL_LIB_HDRS
+    lib/automate.hpp
 )
 
-add_executable(LL-SynAutomate ${LL_HDRS} ${LL_SRCS})
+add_library(LL-SynAutomate-lib ${LL_LIB_HDRS} ${LL_LIB_SRCS})
+
+include_directories(lib)
+
+set(LL_TEST_HDRS
+
+)
+
+set(LL_TEST_SRCS
+	test/main.cpp
+)
+
+add_executable(LL-SynAutomate-test ${LL_TEST_HDRS} ${LL_TEST_SRCS})
+target_link_libraries(LL-SynAutomate-test PRIVATE LL-SynAutomate-lib)

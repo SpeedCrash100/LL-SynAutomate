@@ -42,17 +42,19 @@ public:
 
     bool Analyze(std::basic_istream<char>& input);
 
-	void onSuccess();
-	void onFail();
+	virtual void onSuccess();
+	virtual void onFail();
 
-private:
+protected:
 
-	void initGrammar();
-	void reset();
+	virtual void initGrammar();
+	virtual void reset();
 
     bool isTerm(Symbols sym) const;
     bool isNonTerm(Symbols sym) const;
     bool isValid(Symbols sym) const;
+
+private:
     int getProductionRuleID(Automate::Symbols nterm, Automate::Symbols term) const;
     Automate::Command getCommand(Automate::Symbols topStack, Automate::Symbols currentSymbol);
 
