@@ -4,10 +4,12 @@ project(LL-SynAutomate)
 
 set(LL_LIB_SRCS
     lib/automate.cpp
+	lib/symbol.cpp
 )
 
 set(LL_LIB_HDRS
     lib/automate.hpp
+	lib/symbol.hpp
 )
 
 add_library(LL-SynAutomate-lib ${LL_LIB_HDRS} ${LL_LIB_SRCS})

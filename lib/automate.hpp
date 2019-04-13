@@ -7,34 +7,26 @@
 #include <istream>
 #include <string>
 #include <functional>
+#include "symbol.hpp"
 
 class Automate {
 private:
-    enum Symbols {
-        TERM_INVALID = 0,
-
-        TERM_BEGIN,
-        TERM_EOW,
-        TERM_EMPTY,
-        TERM_END,
-
-        NTERM_BEGIN,
-        NTERM_END
-    };
-
 	typedef std::function<void(void)> Command;
 
-    std::map<char, Symbols> m_charToTerm;
-    std::vector<std::stack<Symbols>> m_productionRules;
-    std::map<Symbols, std::map<Symbols, int>> m_translateTable;
+	std::map<std::string, Symbol> m_symbolsMap;
 
-    std::map<Symbols, std::map<Symbols, Command>> m_commandTable;
+    std::map<char, std::string> m_charToTerm;
+    std::vector<std::stack<Symbol>> m_productionRules;
+    std::map<Symbol, std::map<Symbol, int>> m_translateTable;
 
-    std::stack<Symbols> m_symbols;
+    std::map<Symbol, std::map<Symbol, Command>> m_commandTable;
+
+    std::stack<Symbol> m_symbols;
     std::stack<int> m_values;
 
 	std::basic_string<char> m_readed;
-	Symbols m_axiom;
+
+	std::string m_axiom;
 
 public:
     Automate();
@@ -50,13 +42,16 @@ protected:
 	virtual void initGrammar();
 	virtual void reset();
 
-    bool isTerm(Symbols sym) const;
-    bool isNonTerm(Symbols sym) const;
-    bool isValid(Symbols sym) const;
+    bool isTerm(Symbol sym) const;
+    bool isNonTerm(Symbol sym) const;
+    bool isValid(Symbol sym) const;
+
+	void addTerminal(char ch); 
+    void addNonTerminal(std::string ID); 
 
 private:
-    int getProductionRuleID(Automate::Symbols nterm, Automate::Symbols term) const;
-    Automate::Command getCommand(Automate::Symbols topStack, Automate::Symbols currentSymbol);
+    int getProductionRuleID(Symbol topStack, Symbol currentSymbol) const;
+    Automate::Command getCommand(Symbol topStack, Symbol currentSymbol);
 
     void processCommand(Command cmd);
 };

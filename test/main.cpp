@@ -4,7 +4,7 @@
 int main(int argc, char** argv)
 {
     Automate automat;
-    for (int i = 1; i < argc; i++) {
+    for (int i = 1; i < argc; i++ ) {
 		std::string str = argv[i];
 		std::stringstream ss(str);
         automat.Analyze(ss);

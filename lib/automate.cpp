@@ -1,36 +1,42 @@
 #include "automate.hpp"
 #include <iostream>
+#include <stdexcept>
 
-Automate::Automate() : m_axiom(NTERM_BEGIN)
+Automate::Automate()
 {
-	initGrammar();
-	reset();
+
+	m_symbolsMap["EMPTY"] = Symbol("EMPTY", "<EMPTY>", true);
+    m_symbolsMap["EOW"] = Symbol("EOW", "<EOW>", true);
+
+    initGrammar();
+    reset();
 }
 
 bool Automate::Analyze(std::basic_istream<char>& input)
 {
     if (input.fail())
         return false;
-	reset();
+    reset();
 
     std::cout << "Used rules: ";
 
-	char symbol = input.peek();
+    char symbol = input.peek();
 
     while (!m_symbols.empty()) {
         auto topStack = m_symbols.top();
         symbol = input.peek();
+        auto symbolAsTerminal = m_symbolsMap[m_charToTerm[symbol]];
 
-        auto cmd = getCommand(topStack, m_charToTerm[symbol]);
+        auto cmd = getCommand(topStack, symbolAsTerminal);
         processCommand(cmd);
 
-        if (topStack == m_charToTerm[symbol]) {
+        if (topStack == symbolAsTerminal) {
             m_symbols.pop();
             input.get();
-        } else if (isTerm(topStack) || !isValid(m_charToTerm[symbol])) {
+        } else if (isTerm(topStack) || !isValid(symbolAsTerminal)) {
             break;
         } else {
-            int prodRule = getProductionRuleID(topStack, m_charToTerm[symbol]);
+            int prodRule = getProductionRuleID(topStack, symbolAsTerminal);
             if (prodRule == -1) {
                 break;
             }
@@ -41,7 +47,7 @@ bool Automate::Analyze(std::basic_istream<char>& input)
             auto prodStack = m_productionRules[static_cast<size_t>(prodRule)];
             while (!prodStack.empty()) {
                 auto sym = prodStack.top();
-                if (sym != TERM_EMPTY)
+                if (sym != m_symbolsMap["EMPTY"])
                     m_symbols.push(sym);
                 prodStack.pop();
             }
@@ -50,76 +56,108 @@ bool Automate::Analyze(std::basic_istream<char>& input)
 
     std::cout << "END\n";
 
-	std::cout << "Readed : " << m_readed << "\n";
+    std::cout << "Readed : " << m_readed << "\n";
 
-    if (m_symbols.empty() && m_charToTerm[symbol] == TERM_EOW) {
-		onSuccess();
+	auto curTerminal = m_symbolsMap[m_charToTerm[symbol]];
+
+    if (m_symbols.empty() && curTerminal == m_symbolsMap["EOW"]) {
+        onSuccess();
         return true;
     }
 
-	onFail();
+    onFail();
     return false;
 }
 
 void Automate::onSuccess()
 {
-	std::cout << "Success\n";
+    std::cout << "Success\n";
 }
 
 void Automate::onFail()
 {
-	std::cout << "Invalid word.\n";
+    std::cout << "Invalid word.\n";
 }
 
 void Automate::initGrammar()
 {
-	m_charToTerm = {
-		{ '\0', TERM_EOW },
-		{ '\n', TERM_EOW }
-	};
+    m_charToTerm = {
+        { '\0', "EOW" },
+        { '\n', "EOW" }
+    };
 }
 
 void Automate::reset()
 {
-	while (!m_symbols.empty())
-		m_symbols.pop();
-	m_symbols.push(m_axiom); 
+    while (!m_symbols.empty())
+        m_symbols.pop();
+    m_symbols.push(m_symbolsMap[ m_axiom ]);
 
-	while (!m_values.empty())
-		m_values.pop();
+    while (!m_values.empty())
+        m_values.pop();
 }
 
-bool Automate::isTerm(Automate::Symbols sym) const
+bool Automate::isTerm(Symbol sym) const
 {
-    return TERM_BEGIN < sym && sym < TERM_END;
+    auto it = m_symbolsMap.find(sym.ID());
+    if (it != m_symbolsMap.end()) {
+        if ((*it).second.isTerm())
+            return true;
+	}
+    return false;
 }
 
-bool Automate::isNonTerm(Automate::Symbols sym) const
+bool Automate::isNonTerm(Symbol sym) const
 {
-    return NTERM_BEGIN < sym && sym < NTERM_END;
+    auto it = m_symbolsMap.find(sym.ID());
+    if (it != m_symbolsMap.end()) {
+        if (!(*it).second.isTerm())
+            return true;
+    }
+    return false;
 }
 
-bool Automate::isValid(Automate::Symbols sym) const
+bool Automate::isValid(Symbol sym) const
 {
     return isTerm(sym) || isNonTerm(sym);
 }
 
-int Automate::getProductionRuleID(Automate::Symbols nterm, Automate::Symbols term) const
+void Automate::addTerminal(char ch)
+{
+    if (m_symbolsMap.find({ ch }) != m_symbolsMap.end()) {
+        throw std::runtime_error("The symbol with ID \"" + std::string({ ch }) + "\" is already exist");
+    }
+
+    Symbol sym = Symbol({ ch }, { ch }, true);
+    m_symbolsMap[sym.ID()] = sym;
+}
+
+void Automate::addNonTerminal(std::string ID)
+{
+    if (m_symbolsMap.find(ID) != m_symbolsMap.end()) {
+        throw std::runtime_error("The symbol with ID \"" + ID + "\" is already exist");
+    }
+
+    Symbol sym = Symbol(ID, "<" + ID + ">", false);
+    m_symbolsMap[ID] = sym;
+}
+
+int Automate::getProductionRuleID(Symbol topStack, Symbol currentSymbol) const
 {
     int rule = -1;
     try {
-        rule = m_translateTable.at(nterm).at(term);
+        rule = m_translateTable.at(topStack).at(currentSymbol);
     } catch (...) {
         return -1;
     }
     return rule;
 }
 
-Automate::Command Automate::getCommand(Automate::Symbols topStack, Automate::Symbols currentSymbol)
+Automate::Command Automate::getCommand(Symbol topStack, Symbol currentSymbol)
 {
-	Automate::Command emptyCommand = []() { return; };
+    Automate::Command emptyCommand = []() { return; };
     if (!isValid(topStack) || !isValid(currentSymbol))
-		return emptyCommand;
+        return emptyCommand;
 
     auto cmd = emptyCommand;
     try {
@@ -132,5 +170,5 @@ Automate::Command Automate::getCommand(Automate::Symbols topStack, Automate::Sym
 
 void Automate::processCommand(Automate::Command cmd)
 {
-	cmd();
+    cmd();
 }
