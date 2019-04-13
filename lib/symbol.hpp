@@ -11,7 +11,7 @@ class Symbol {
 public:
     Symbol(std::string id = "", std::string printedName = "", bool isTerm = false);
     Symbol(const Symbol&) = default;
-    ~Symbol() = default;
+    virtual ~Symbol() = default;
 
     auto printedName() const { return m_printedName; }
     auto ID() const { return m_ID; }

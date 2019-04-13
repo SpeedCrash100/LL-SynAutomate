@@ -132,7 +132,16 @@ bool Automate::isEOW(const Symbol& sym) const
     return false;
 }
 
-void Automate::addTerminal(char ch)
+Symbol Automate::getEmptySymbol() const {
+    return m_symbolsMap.at(m_empty)
+}
+
+Symbol Automate::getEOWSymbol() const
+{
+    return m_symbolsMap.at(m_eow);
+}
+
+Symbol Automate::addTerminal(char ch)
 {
     if (m_symbolsMap.find({ ch }) != m_symbolsMap.end()) {
         throw std::runtime_error("The symbol with ID \"" + std::string({ ch }) + "\" is already exist");
@@ -140,9 +149,10 @@ void Automate::addTerminal(char ch)
 
     Symbol sym = Symbol({ ch }, { ch }, true);
     m_symbolsMap[sym.ID()] = sym;
+    return sym;
 }
 
-void Automate::addNonTerminal(std::string ID)
+Symbol Automate::addNonTerminal(std::string ID)
 {
     if (m_symbolsMap.find(ID) != m_symbolsMap.end()) {
         throw std::runtime_error("The symbol with ID \"" + ID + "\" is already exist");
@@ -150,6 +160,7 @@ void Automate::addNonTerminal(std::string ID)
 
     Symbol sym = Symbol(ID, "<" + ID + ">", false);
     m_symbolsMap[ID] = sym;
+    return sym;
 }
 
 int Automate::getProductionRuleID(Symbol topStack, Symbol currentSymbol) const

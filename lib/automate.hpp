@@ -10,25 +10,26 @@
 #include <vector>
 
 class Automate {
-private:
+protected:
     typedef std::function<void(void)> Command;
 
-    std::map<std::string, Symbol> m_symbolsMap;
     std::vector<Terminal> m_eowSymbols;
-
     std::vector<std::stack<Symbol>> m_productionRules;
     std::map<Symbol, std::map<Symbol, int>> m_translateTable;
-
     std::map<Symbol, std::map<Symbol, Command>> m_commandTable;
 
-    std::stack<Symbol> m_symbols;
     std::stack<int> m_values;
-
-    std::basic_string<char> m_readed;
 
     std::string m_axiom;
     std::string m_empty;
     std::string m_eow;
+
+private:
+    std::map<std::string, Symbol> m_symbolsMap;
+
+    std::stack<Symbol> m_symbols;
+
+    //std::basic_string<char> m_readed;
 
 public:
     Automate();
@@ -48,8 +49,11 @@ protected:
     bool isValid(Symbol sym) const;
     bool isEOW(const Symbol& sym) const;
 
-    void addTerminal(char ch);
-    void addNonTerminal(std::string ID);
+    Symbol getEmptySymbol() const;
+    Symbol getEOWSymbol() const;
+
+    Symbol addTerminal(char ch);
+    Symbol addNonTerminal(std::string ID);
 
 private:
     int getProductionRuleID(Symbol topStack, Symbol currentSymbol) const;
