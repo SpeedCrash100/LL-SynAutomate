@@ -1,0 +1,13 @@
+build
+*/build
+*.user
+*.exe
+*.dll
+*.a
+*.o
+*.so
+*.out
+
+.vs
+.vscode
+CMakeSettings.json
