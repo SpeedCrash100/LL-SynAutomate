@@ -1,12 +1,16 @@
 #include "automate.hpp"
 #include <iostream>
 #include <stdexcept>
+#include <utility>
 
 Automate::Automate()
+    : m_axiom("S")
+    , m_empty("EMPTY")
+    , m_eow("EOW")
 {
 
-	m_symbolsMap["EMPTY"] = Symbol("EMPTY", "<EMPTY>", true);
-    m_symbolsMap["EOW"] = Symbol("EOW", "<EOW>", true);
+    m_symbolsMap[m_empty] = Symbol(m_empty, "<" + m_empty + ">", true);
+    m_symbolsMap[m_eow] = Symbol(m_eow, "<" + m_eow + ">", true);
 
     initGrammar();
     reset();
@@ -20,23 +24,23 @@ bool Automate::Analyze(std::basic_istream<char>& input)
 
     std::cout << "Used rules: ";
 
-    char symbol = input.peek();
+    Terminal symbol = static_cast<char>(input.peek());
 
     while (!m_symbols.empty()) {
         auto topStack = m_symbols.top();
-        symbol = input.peek();
-        auto symbolAsTerminal = m_symbolsMap[m_charToTerm[symbol]];
 
-        auto cmd = getCommand(topStack, symbolAsTerminal);
+        symbol = static_cast<char>(input.peek());
+
+        auto cmd = getCommand(topStack, symbol);
         processCommand(cmd);
 
-        if (topStack == symbolAsTerminal) {
+        if (topStack == symbol) {
             m_symbols.pop();
             input.get();
-        } else if (isTerm(topStack) || !isValid(symbolAsTerminal)) {
+        } else if (isTerm(topStack) || !isValid(symbol)) {
             break;
         } else {
-            int prodRule = getProductionRuleID(topStack, symbolAsTerminal);
+            int prodRule = getProductionRuleID(topStack, symbol);
             if (prodRule == -1) {
                 break;
             }
@@ -47,7 +51,7 @@ bool Automate::Analyze(std::basic_istream<char>& input)
             auto prodStack = m_productionRules[static_cast<size_t>(prodRule)];
             while (!prodStack.empty()) {
                 auto sym = prodStack.top();
-                if (sym != m_symbolsMap["EMPTY"])
+                if (sym != m_symbolsMap[m_empty])
                     m_symbols.push(sym);
                 prodStack.pop();
             }
@@ -58,9 +62,7 @@ bool Automate::Analyze(std::basic_istream<char>& input)
 
     std::cout << "Readed : " << m_readed << "\n";
 
-	auto curTerminal = m_symbolsMap[m_charToTerm[symbol]];
-
-    if (m_symbols.empty() && curTerminal == m_symbolsMap["EOW"]) {
+    if (m_symbols.empty() && symbol == m_symbolsMap[m_eow]) {
         onSuccess();
         return true;
     }
@@ -81,17 +83,14 @@ void Automate::onFail()
 
 void Automate::initGrammar()
 {
-    m_charToTerm = {
-        { '\0', "EOW" },
-        { '\n', "EOW" }
-    };
+    m_eowSymbols = { '\0', '\n' };
 }
 
 void Automate::reset()
 {
     while (!m_symbols.empty())
         m_symbols.pop();
-    m_symbols.push(m_symbolsMap[ m_axiom ]);
+    m_symbols.push(m_symbolsMap[m_axiom]);
 
     while (!m_values.empty())
         m_values.pop();
@@ -103,7 +102,7 @@ bool Automate::isTerm(Symbol sym) const
     if (it != m_symbolsMap.end()) {
         if ((*it).second.isTerm())
             return true;
-	}
+    }
     return false;
 }
 
@@ -120,6 +119,15 @@ bool Automate::isNonTerm(Symbol sym) const
 bool Automate::isValid(Symbol sym) const
 {
     return isTerm(sym) || isNonTerm(sym);
+}
+
+bool Automate::isEOW(const Symbol& sym) const
+{
+    for (auto eow : m_eowSymbols) {
+        if (eow == sym)
+            return true;
+    }
+    return false;
 }
 
 void Automate::addTerminal(char ch)

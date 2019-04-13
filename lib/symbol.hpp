@@ -13,17 +13,31 @@ public:
     Symbol(const Symbol&) = default;
     ~Symbol() = default;
 
-	auto printedName() const { return m_printedName; }
+    auto printedName() const { return m_printedName; }
     auto ID() const { return m_ID; }
     auto isTerm() const { return m_isTerminal; }
 
-	bool operator==(const Symbol& other) const;
-    bool operator!=(const Symbol& other) const;
-    inline bool operator<(const Symbol& other) const { return m_ID < other.m_ID; }
-    inline bool operator>(const Symbol& other) const { return m_ID > other.m_ID; }
-
+    virtual bool operator==(const Symbol& other) const;
+    virtual bool operator!=(const Symbol& other) const;
+    virtual Symbol& operator=(const Symbol& other);
+    virtual inline bool operator<(const Symbol& other) const { return m_ID < other.m_ID; }
+    virtual inline bool operator>(const Symbol& other) const { return m_ID > other.m_ID; }
 };
 
+class Terminal : public Symbol {
+public:
+    Terminal(char ch = '\0')
+        : Symbol({ ch }, { ch }, true)
+    {
+    }
+};
 
+class NonTerminal : public Symbol {
+public:
+    NonTerminal(std::string id)
+        : Symbol(id, "<" + id + ">", false)
+    {
+    }
+};
 
 #endif // SYMBOL_HPP

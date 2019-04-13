@@ -1,21 +1,21 @@
 #ifndef AUTOMATE_HPP
 #define AUTOMATE_HPP
 
+#include "symbol.hpp"
+#include <functional>
+#include <istream>
 #include <map>
 #include <stack>
-#include <vector>
-#include <istream>
 #include <string>
-#include <functional>
-#include "symbol.hpp"
+#include <vector>
 
 class Automate {
 private:
-	typedef std::function<void(void)> Command;
+    typedef std::function<void(void)> Command;
 
-	std::map<std::string, Symbol> m_symbolsMap;
+    std::map<std::string, Symbol> m_symbolsMap;
+    std::vector<Terminal> m_eowSymbols;
 
-    std::map<char, std::string> m_charToTerm;
     std::vector<std::stack<Symbol>> m_productionRules;
     std::map<Symbol, std::map<Symbol, int>> m_translateTable;
 
@@ -24,9 +24,11 @@ private:
     std::stack<Symbol> m_symbols;
     std::stack<int> m_values;
 
-	std::basic_string<char> m_readed;
+    std::basic_string<char> m_readed;
 
-	std::string m_axiom;
+    std::string m_axiom;
+    std::string m_empty;
+    std::string m_eow;
 
 public:
     Automate();
@@ -34,20 +36,20 @@ public:
 
     bool Analyze(std::basic_istream<char>& input);
 
-	virtual void onSuccess();
-	virtual void onFail();
+    virtual void onSuccess();
+    virtual void onFail();
 
 protected:
-
-	virtual void initGrammar();
-	virtual void reset();
+    virtual void initGrammar();
+    virtual void reset();
 
     bool isTerm(Symbol sym) const;
     bool isNonTerm(Symbol sym) const;
     bool isValid(Symbol sym) const;
+    bool isEOW(const Symbol& sym) const;
 
-	void addTerminal(char ch); 
-    void addNonTerminal(std::string ID); 
+    void addTerminal(char ch);
+    void addNonTerminal(std::string ID);
 
 private:
     int getProductionRuleID(Symbol topStack, Symbol currentSymbol) const;
