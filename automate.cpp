@@ -13,7 +13,7 @@ bool Automate::Analyze(std::basic_istream<char>& input)
         return false;
 	reset();
 
-    std::cout << "  Used rules: ";
+    std::cout << "Used rules: ";
 
 	char symbol = input.peek();
 
@@ -63,7 +63,7 @@ bool Automate::Analyze(std::basic_istream<char>& input)
 
 void Automate::onSuccess()
 {
-	std::cout << "Value is " << m_values.top() << "\n";
+	std::cout << "Success\n";
 }
 
 void Automate::onFail()
@@ -115,24 +115,22 @@ int Automate::getProductionRuleID(Automate::Symbols nterm, Automate::Symbols ter
     return rule;
 }
 
-Automate::Commands Automate::getCommand(Automate::Symbols topStack, Automate::Symbols currentSymbol)
+Automate::Command Automate::getCommand(Automate::Symbols topStack, Automate::Symbols currentSymbol)
 {
+	Automate::Command emptyCommand = []() { return; };
     if (!isValid(topStack) || !isValid(currentSymbol))
-        return CMD_NO;
+		return emptyCommand;
 
-    Automate::Commands cmd = CMD_NO;
+    auto cmd = emptyCommand;
     try {
         cmd = m_commandTable.at(topStack).at(currentSymbol);
     } catch (...) {
-        return CMD_NO;
+        return emptyCommand;
     }
     return cmd;
 }
 
-void Automate::processCommand(Automate::Commands cmd)
+void Automate::processCommand(Automate::Command cmd)
 {
-    switch (cmd) {
-    default:
-        break;
-    }
+	cmd();
 }

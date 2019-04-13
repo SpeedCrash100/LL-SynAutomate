@@ -6,6 +6,7 @@
 #include <vector>
 #include <istream>
 #include <string>
+#include <functional>
 
 class Automate {
 private:
@@ -21,14 +22,13 @@ private:
         NTERM_END
     };
 
-    enum Commands {
-        CMD_NO = 0
-    };
+	typedef std::function<void(void)> Command;
 
     std::map<char, Symbols> m_charToTerm;
     std::vector<std::stack<Symbols>> m_productionRules;
     std::map<Symbols, std::map<Symbols, int>> m_translateTable;
-    std::map<Symbols, std::map<Symbols, Commands>> m_commandTable;
+
+    std::map<Symbols, std::map<Symbols, Command>> m_commandTable;
 
     std::stack<Symbols> m_symbols;
     std::stack<int> m_values;
@@ -54,9 +54,9 @@ private:
     bool isNonTerm(Symbols sym) const;
     bool isValid(Symbols sym) const;
     int getProductionRuleID(Automate::Symbols nterm, Automate::Symbols term) const;
-    Commands getCommand(Automate::Symbols topStack, Automate::Symbols currentSymbol);
+    Automate::Command getCommand(Automate::Symbols topStack, Automate::Symbols currentSymbol);
 
-    void processCommand(Commands cmd);
+    void processCommand(Command cmd);
 };
 
 #endif // AUTOMATE_HPP
