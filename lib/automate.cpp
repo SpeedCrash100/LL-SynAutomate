@@ -11,7 +11,10 @@ Automate::Automate()
 
     m_symbolsMap[m_empty] = Symbol(m_empty, "<" + m_empty + ">", true);
     m_symbolsMap[m_eow] = Symbol(m_eow, "<" + m_eow + ">", true);
+}
 
+void Automate::Init()
+{
     initGrammar();
     reset();
 }
@@ -22,15 +25,15 @@ bool Automate::Analyze(std::basic_istream<char>& input)
         return false;
     reset();
 
-    std::cout << "Used rules: ";
-
     Symbol symbol = Terminal(static_cast<char>(input.peek()));
+
+    std::cout << "Used rules: ";
 
     while (!m_symbols.empty()) {
         auto topStack = m_symbols.top();
 
         symbol = Terminal(static_cast<char>(input.peek()));
-        if (isEOW(symbol))
+        if (isEOW(symbol) || input.eof())
             symbol = m_symbolsMap[m_eow];
 
         auto cmd = getCommand(topStack, symbol);
@@ -62,7 +65,7 @@ bool Automate::Analyze(std::basic_istream<char>& input)
 
     std::cout << "END\n";
 
-    std::cout << "Readed : " << m_readed << "\n";
+    //std::cout << "Readed : " << m_readed << "\n";
 
     if (m_symbols.empty() && symbol == m_symbolsMap[m_eow]) {
         onSuccess();
@@ -132,8 +135,9 @@ bool Automate::isEOW(const Symbol& sym) const
     return false;
 }
 
-Symbol Automate::getEmptySymbol() const {
-    return m_symbolsMap.at(m_empty)
+Symbol Automate::getEmptySymbol() const
+{
+    return m_symbolsMap.at(m_empty);
 }
 
 Symbol Automate::getEOWSymbol() const
@@ -141,7 +145,7 @@ Symbol Automate::getEOWSymbol() const
     return m_symbolsMap.at(m_eow);
 }
 
-Symbol Automate::addTerminal(char ch)
+const Symbol& Automate::addTerminal(char ch)
 {
     if (m_symbolsMap.find({ ch }) != m_symbolsMap.end()) {
         throw std::runtime_error("The symbol with ID \"" + std::string({ ch }) + "\" is already exist");
@@ -149,10 +153,10 @@ Symbol Automate::addTerminal(char ch)
 
     Symbol sym = Symbol({ ch }, { ch }, true);
     m_symbolsMap[sym.ID()] = sym;
-    return sym;
+    return m_symbolsMap[sym.ID()];
 }
 
-Symbol Automate::addNonTerminal(std::string ID)
+const Symbol& Automate::addNonTerminal(std::string ID)
 {
     if (m_symbolsMap.find(ID) != m_symbolsMap.end()) {
         throw std::runtime_error("The symbol with ID \"" + ID + "\" is already exist");
@@ -160,7 +164,7 @@ Symbol Automate::addNonTerminal(std::string ID)
 
     Symbol sym = Symbol(ID, "<" + ID + ">", false);
     m_symbolsMap[ID] = sym;
-    return sym;
+    return m_symbolsMap[ID];
 }
 
 int Automate::getProductionRuleID(Symbol topStack, Symbol currentSymbol) const

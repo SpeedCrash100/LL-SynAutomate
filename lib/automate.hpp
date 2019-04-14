@@ -24,16 +24,18 @@ protected:
     std::string m_empty;
     std::string m_eow;
 
+    std::stack<Symbol> m_symbols;
+
 private:
     std::map<std::string, Symbol> m_symbolsMap;
-
-    std::stack<Symbol> m_symbols;
 
     //std::basic_string<char> m_readed;
 
 public:
     Automate();
     Automate(const Automate&) = delete;
+
+    void Init();
 
     bool Analyze(std::basic_istream<char>& input);
 
@@ -52,8 +54,8 @@ protected:
     Symbol getEmptySymbol() const;
     Symbol getEOWSymbol() const;
 
-    Symbol addTerminal(char ch);
-    Symbol addNonTerminal(std::string ID);
+    const Symbol& addTerminal(char ch);
+    const Symbol& addNonTerminal(std::string ID);
 
 private:
     int getProductionRuleID(Symbol topStack, Symbol currentSymbol) const;
