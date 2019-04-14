@@ -77,8 +77,7 @@ void TestAutomate::initGrammar()
     auto addDigit3 = [=]() { addDigit(3); };
     auto addDigit4 = [=]() { addDigit(4); };
 
-    auto sum
-        = [&]() {
+    auto sum = [&]() {
         if(m_values.size() < 2)
             return;
         auto fst = m_values.top();
@@ -102,4 +101,10 @@ void TestAutomate::initGrammar()
     m_commandTable[TERM_4][TERM_4] = addDigit4;
     m_commandTable[TERM_SUM][TERM_SUM] = sum;
     m_commandTable[TERM_MUL][TERM_MUL] = mul;
+}
+void TestAutomate::reset()
+{
+    Automate::reset();
+    while (!m_values.empty())
+        m_values.pop();
 }

@@ -18,8 +18,6 @@ protected:
     std::map<Symbol, std::map<Symbol, int>> m_translateTable;
     std::map<Symbol, std::map<Symbol, Command>> m_commandTable;
 
-    std::stack<int> m_values;
-
     std::string m_axiom;
     std::string m_empty;
     std::string m_eow;

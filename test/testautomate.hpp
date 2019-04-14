@@ -4,6 +4,7 @@
 #include "automate.hpp"
 
 class TestAutomate : public Automate {
+    std::stack<int> m_values;
 public:
     TestAutomate();
     virtual ~TestAutomate() = default;
@@ -15,6 +16,7 @@ public:
 
 protected:
     void initGrammar() override;
+    void reset() override;
 };
 
 #endif // TESTAUTOMATE_HPP

@@ -96,9 +96,6 @@ void Automate::reset()
     while (!m_symbols.empty())
         m_symbols.pop();
     m_symbols.push(m_symbolsMap[m_axiom]);
-
-    while (!m_values.empty())
-        m_values.pop();
 }
 
 bool Automate::isTerm(Symbol sym) const
