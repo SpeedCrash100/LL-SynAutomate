@@ -17,11 +17,12 @@ add_library(LL-SynAutomate-lib ${LL_LIB_HDRS} ${LL_LIB_SRCS})
 include_directories(lib)
 
 set(LL_TEST_HDRS
-
+    test/testautomate.hpp
 )
 
 set(LL_TEST_SRCS
 	test/main.cpp
+        test/testautomate.cpp
 )
 
 add_executable(LL-SynAutomate-test ${LL_TEST_HDRS} ${LL_TEST_SRCS})
